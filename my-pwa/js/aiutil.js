@@ -108,7 +108,7 @@ class ChineseQuestionAnalyzer {
     
     // AI配置
     this.aiConfig = {
-      apiKey: 'sk-b811a6de5c664bdfb63f217142b7a0e1',
+      apiKey: '',
       apiUrl: 'https://api.deepseek.com/chat/completions',
       model: 'deepseek-chat',
       temperature: 0.1,
@@ -632,4 +632,5 @@ ${tagLibraryText}
 // 导出模块
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = ChineseQuestionAnalyzer;
+
 }
