@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能试卷分析</title>
+    <link rel="manifest" href="manifest.json">
+        <style>
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* 基础样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* 容器样式 */
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        /* 标题样式 */
+        h1 {
+            color: #4f46e5;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        /* 描述文字 */
+        .description {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+        
+        /* 功能列表 */
+        .features {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+        
+        .feature-item:hover {
+            background: #edf2f7;
+        }
+        
+        .feature-icon {
+            background: #4f46e5;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        /* 按钮样式 */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        #installBtn {
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+            display: none; /* 初始隐藏，等待安装提示 */
+        }
+        
+        #installBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+        
+        #installBtn:active {
+            transform: translateY(0);
+        }
+        
+        .nav-link {
+            background: white;
+            color: #4f46e5;
+            border: 2px solid #4f46e5;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background: #4f46e5;
+            color: white;
+        }
+        
+        /* 状态指示器 */
+        .status {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f0f9ff;
+            border-radius: 10px;
+            color: #0369a1;
+            font-size: 0.9rem;
+        }
+        
+        .status-online {
+            background: #f0fdf4;
+            color: #166534;
+        }
+        
+        .status-offline {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            #installBtn, .nav-link {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+        
+        /* 暗色模式支持 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 100%);
+            }
+            
+            .container {
+                background: rgba(30, 41, 59, 0.95);
+                color: #e2e8f0;
+            }
+            
+            .description {
+                color: #cbd5e1;
+            }
+            
+            .features {
+                background: #1e293b;
+            }
+            
+            .feature-item:hover {
+                background: #334155;
+            }
+            
+            .nav-link {
+                background: #1e293b;
+                color: #818cf8;
+                border-color: #818cf8;
+            }
+            
+            .nav-link:hover {
+                background: #818cf8;
+                color: #1e293b;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 智能试卷分析</h1>
+        <p>欢迎使用这个渐进式Web应用！</p>
+        <button id="installBtn">安装应用</button>
+        <a href="search.html">前往搜索页面</a>
+    </div>
+    <script>
+                // 注册 Service Worker
+        if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            // 使用相对路径，确保正确指向 sw.js
+            navigator.serviceWorker.register('./sw.js')
+            .then(registration => {
+                console.log('ServiceWorker 注册成功，作用域：', registration.scope);
+                console.log('当前页面路径：', window.location.pathname);
+            })
+            .catch(err => {
+                console.error('ServiceWorker 注册失败:', err);
+                console.error('错误详情：', err.message);
+            });
+        });
+        }
+
+        // 处理安装按钮
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'block';
+        
+        installBtn.addEventListener('click', () => {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(choiceResult => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('用户同意安装');
+            }
+            deferredPrompt = null;
+            });
+        });
+        });
+    </script>
+</body>
+</html>

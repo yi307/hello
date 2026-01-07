@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#2196f3">
+    <title>考试题目搜索系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #9b59b6;
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .main-card {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: none;
+            background: white;
+        }
+        
+        .header-section {
+            padding: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .search-section {
+            padding: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .results-section {
+            padding: 25px;
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            background: var(--primary-color);
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            background: #2980b9;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .search-btn {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .filter-group {
+            background: var(--light-bg);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .type-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .type-tag {
+            padding: 8px 15px;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+        
+        .type-tag:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .type-tag.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .tag-item {
+            padding: 6px 12px;
+            background: #e8f4fc;
+            border-radius: 15px;
+            font-size: 12px;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .tag-item:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .tag-item.selected {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .result-card.exam {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        
+        .card-type {
+            background: var(--accent-color);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        
+        .card-content {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            max-height: 100px;
+            overflow: hidden;
+        }
+        
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .card-tag {
+            background: #ecf0f1;
+            color: #2c3e50;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+        
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #95a5a6;
+        }
+        
+        .action-btn {
+            background: transparent;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .add-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .add-btn:hover {
+            background: #27ae60;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #95a5a6;
+        }
+        
+        @media (max-width: 768px) {
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    #installBtn {
+        background: var(--secondary-color);
+    }
+    #installBtn:hover {
+        background: #27ae60;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-card">
+            <!-- 头部 -->
+            <div class="header-section">
+                <div class="nav-header">
+                    <h1 class="mb-0"><i class="fas fa-search"></i> 考试题目搜索系统</h1>
+                    <button id="installBtn" class="nav-link" style="display:none; margin-right:10px;">
+                        <i class="fas fa-download"></i> 安装应用
+                    </button>
+                    <a href="add.html" class="nav-link">
+                        <i class="fas fa-file-alt"></i> 前往分析页面
+                    </a>
+                </div>
+                <p class="text-muted mb-0">根据试卷、类型、标签快速查找题目</p>
+                <div id="dbStatus" class="mt-2">
+                    <span class="badge bg-info">
+                        <i class="fas fa-spinner fa-spin"></i> 正在初始化数据库...
+                    </span>
+                </div>
+            </div>
+            
+            <!-- 搜索区域 -->
+            <div class="search-section">
+                <div class="search-box">
+                    <input type="text" id="examSearch" class="search-input" placeholder="输入试卷名称搜索...">
+                    <button id="searchBtn" class="search-btn">
+                        <i class="fas fa-search"></i> 搜索
+                    </button>
+                </div>
+                
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0"><i class="fas fa-book"></i> 题目类型</h5>
+                            <button class="add-btn btn-sm" onclick="showAddTypeModal()">
+                                <i class="fas fa-plus"></i> 添加
+                            </button>
+                        </div>
+                        <div class="type-tags" id="typeContainer">
+                            <div class="type-tag active" onclick="selectType(null)">
+                                <i class="fas fa-list"></i> 全部类型
+                            </div>
+                            <!-- 类型标签将通过JS动态生成 -->
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0"><i class="fas fa-tags"></i> 题目标签</h5>
+                            <button class="add-btn btn-sm" onclick="showAddTagModal()">
+                                <i class="fas fa-plus"></i> 添加
+                            </button>
+                        </div>
+                        <div class="tag-list" id="tagContainer">
+                            <div class="text-muted">选择类型后显示标签</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 结果区域 -->
+            <div class="results-section">
+                <div class="results-header">
+                    <h3 class="mb-0"><i class="fas fa-list"></i> 搜索结果</h3>
+                    <div class="text-muted" id="resultCount">共找到 0 个结果</div>
+                </div>
+                <div class="results-grid" id="resultsGrid">
+                    <div class="empty-state">
+                        <i class="fas fa-search fa-3x mb-3"></i>
+                        <h4>开始搜索</h4>
+                        <p>输入搜索条件开始查找题目</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal" id="addTypeModal">
+        <div class="modal-content">
+            <button class="btn-close position-absolute top-0 end-0 m-3" onclick="hideAddTypeModal()"></button>
+            <h4 class="modal-title mb-4"><i class="fas fa-plus-circle"></i> 添加题目类型</h4>
+            <div class="input-group mb-3">
+                <input type="text" id="newTypeInput" class="form-control" placeholder="输入新的题目类型...">
+                <button class="btn btn-primary" onclick="addNewType()">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="addTagModal">
+        <div class="modal-content">
+            <button class="btn-close position-absolute top-0 end-0 m-3" onclick="hideAddTagModal()"></button>
+            <h4 class="modal-title mb-4"><i class="fas fa-tag"></i> 添加题目标签</h4>
+            <div class="mb-3">
+                <input type="text" id="newTagInput" class="form-control mb-3" placeholder="输入新的标签...">
+                <select id="tagTypeSelect" class="form-select">
+                    <option value="">请选择类型</option>
+                </select>
+            </div>
+            <button class="btn btn-primary w-100" onclick="addNewTag()">添加标签</button>
+        </div>
+    </div>
+
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <button class="btn-close position-absolute top-0 end-0 m-3" onclick="hideDetailModal()"></button>
+            <h4 class="modal-title mb-4" id="detailTitle"></h4>
+            <div class="modal-body" id="detailBody"></div>
+        </div>
+    </div>
+
+    <script src="js/ExamDatabase.js"></script>
+    <script>
+                // 注册 Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('Service Worker 注册成功:', registration);
+                    })
+                    .catch(err => {
+                        console.log('Service Worker 注册失败:', err);
+                    });
+            });
+        }
+
+        let examDB = null;
+        let selectedTypeId = null;
+        let selectedTagIds = new Set();
+        let currentResults = [];
+        let allTypes = [];
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await waitForDatabase();
+                examDB = window.examDB;
+                
+                document.getElementById('dbStatus').innerHTML = 
+                    '<span class="badge bg-success"><i class="fas fa-check-circle"></i> 数据库已就绪</span>';
+                
+                await loadData();
+                await search();
+            } catch (error) {
+                console.error('初始化失败:', error);
+                document.getElementById('dbStatus').innerHTML = 
+                    `<span class="badge bg-danger"><i class="fas fa-exclamation-circle"></i> 初始化失败</span>`;
+            }
+        });
+
+        async function waitForDatabase() {
+            return new Promise((resolve, reject) => {
+                let attempts = 0;
+                const checkDB = () => {
+                    attempts++;
+                    if (window.examDB && window.examDB.db) {
+                        resolve();
+                    } else if (attempts >= 30) {
+                        reject(new Error('数据库初始化超时'));
+                    } else {
+                        setTimeout(checkDB, 100);
+                    }
+                };
+                checkDB();
+            });
+        }
+
+        async function loadData() {
+            try {
+                allTypes = await examDB.getAllQuestionTypes();
+                renderTypes(allTypes);
+                populateTypeSelect();
+            } catch (error) {
+                console.error('加载数据失败:', error);
+            }
+        }
+
+        function renderTypes(types) {
+            const container = document.getElementById('typeContainer');
+            container.innerHTML = `
+                <div class="type-tag ${selectedTypeId === null ? 'active' : ''}" onclick="selectType(null)">
+                    <i class="fas fa-list"></i> 全部类型
+                </div>
+            `;
+            
+            types.forEach(type => {
+                const typeTag = document.createElement('div');
+                typeTag.className = `type-tag ${selectedTypeId === type.id ? 'active' : ''}`;
+                typeTag.innerHTML = `
+                    <i class="fas fa-book"></i> ${type.content}
+                    <i class="fas fa-times ms-2" onclick="deleteType(${type.id}, event)" style="font-size: 12px;"></i>
+                `;
+                typeTag.onclick = (e) => {
+                    if (!e.target.closest('.fa-times')) {
+                        selectType(type.id);
+                    }
+                };
+                container.appendChild(typeTag);
+            });
+        }
+
+        async function selectType(typeId) {
+            selectedTypeId = typeId;
+            selectedTagIds.clear();
+            renderTypes(allTypes);
+            await loadTagsByType(typeId);
+            search();
+        }
+
+        async function loadTagsByType(typeId) {
+            const container = document.getElementById('tagContainer');
+            try {
+                let tags = typeId ? await examDB.getTagsByTypeId(typeId) : await examDB.getAllTags();
+                renderTags(tags);
+            } catch (error) {
+                container.innerHTML = '<div class="text-danger">加载失败</div>';
+            }
+        }
+
+        function renderTags(tags) {
+            const container = document.getElementById('tagContainer');
+            if (!tags || tags.length === 0) {
+                container.innerHTML = '<div class="text-muted">暂无标签</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            tags.forEach(tag => {
+                const tagItem = document.createElement('div');
+                tagItem.className = `tag-item ${selectedTagIds.has(tag.id) ? 'selected' : ''}`;
+                tagItem.innerHTML = `
+                    <i class="fas fa-tag"></i> ${tag.content}
+                    <i class="fas fa-times ms-1" onclick="deleteTag(${tag.id}, event)" style="font-size: 10px;"></i>
+                `;
+                tagItem.onclick = (e) => {
+                    if (!e.target.closest('.fa-times')) {
+                        if (selectedTagIds.has(tag.id)) {
+                            selectedTagIds.delete(tag.id);
+                        } else {
+                            selectedTagIds.add(tag.id);
+                        }
+                        renderTags(tags);
+                        search();
+                    }
+                };
+                container.appendChild(tagItem);
+            });
+        }
+
+        // 搜索功能
+        async function search() {
+            const examName = document.getElementById('examSearch').value.trim();
+            const tagIds = Array.from(selectedTagIds);
+            
+            try {
+                const results = await examDB.searchQuestions({
+                    examName: examName || undefined,
+                    typeId: selectedTypeId || undefined,
+                    tagIds: tagIds.length > 0 ? tagIds : undefined
+                });
+                
+                currentResults = results;
+                renderResults(results);
+            } catch (error) {
+                console.error('搜索失败:', error);
+                showError('搜索失败: ' + error.message);
+            }
+        }
+
+        function renderResults(results) {
+            const container = document.getElementById('resultsGrid');
+            const countElement = document.getElementById('resultCount');
+            countElement.textContent = `共找到 ${results.length} 个结果`;
+            
+            if (results.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <h4>没有找到相关结果</h4>
+                        <p>尝试修改搜索条件</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            results.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `result-card ${item.exam_info ? 'question' : 'exam'}`;
+                
+                if (item.exam_info) {
+                    // 题目卡片
+                    const typeName = item.type_info?.content || '未分类';
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <div class="card-title">题目 #${item.id}</div>
+                            <span class="badge bg-primary">${typeName}</span>
+                        </div>
+                        <div class="card-content">
+                            ${item.content?.substring(0, 150) || '无内容'}${item.content?.length > 150 ? '...' : ''}
+                        </div>
+                        ${item.tags?.length > 0 ? `
+                            <div class="card-tags">
+                                ${item.tags.map(tag => `<span class="card-tag">${tag.content}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="card-footer">
+                            <span><i class="fas fa-file-alt"></i> ${item.exam_info?.name || '未分配'}</span>
+                            <button class="action-btn" onclick="deleteQuestion(${item.id}, event)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    card.onclick = (e) => !e.target.closest('.action-btn') && showQuestionDetail(item);
+                } else {
+                    // 试卷卡片
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <div class="card-title"><i class="fas fa-file-alt"></i> ${item.name}</div>
+                        </div>
+                        <div class="card-content">${item.description || '无描述信息'}</div>
+                        <div class="card-footer">
+                            <span><i class="fas fa-calendar"></i> ${new Date(item.created_at).toLocaleDateString()}</span>
+                            <button class="action-btn" onclick="deleteExam(${item.id}, event)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    card.onclick = (e) => !e.target.closest('.action-btn') && showExamDetail(item);
+                }
+                
+                container.appendChild(card);
+            });
+        }
+
+        // 详情查看
+        async function showQuestionDetail(question) {
+            document.getElementById('detailTitle').textContent = `题目详情 #${question.id}`;
+            document.getElementById('detailBody').innerHTML = `
+                <div class="mb-3">
+                    <strong>内容：</strong>
+                    <div class="bg-light p-3 rounded mt-1">${question.content || '无'}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <strong>所属试卷：</strong>
+                        <p>${question.exam_info?.name || '未分配'}</p>
+                    </div>
+                    <div class="col-6">
+                        <strong>题目类型：</strong>
+                        <p>${question.type_info?.content || '未分类'}</p>
+                    </div>
+                </div>
+                ${question.tags?.length > 0 ? `
+                    <div class="mb-3">
+                        <strong>标签：</strong>
+                        <div class="d-flex flex-wrap gap-1 mt-1">
+                            ${question.tags.map(tag => `<span class="badge bg-info">${tag.content}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                <div class="text-muted small">
+                    <i class="fas fa-calendar"></i> 创建时间：${new Date(question.created_at).toLocaleString()}
+                </div>
+            `;
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        async function showExamDetail(exam) {
+            try {
+                const questions = await examDB.getQuestionsByExamId(exam.id);
+                document.getElementById('detailTitle').textContent = `试卷详情：${exam.name}`;
+                document.getElementById('detailBody').innerHTML = `
+                    <div class="mb-3">
+                        <strong>描述：</strong>
+                        <div class="bg-light p-3 rounded mt-1">${exam.description || '无描述信息'}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <strong>创建时间：</strong>
+                            <p>${new Date(exam.created_at).toLocaleString()}</p>
+                        </div>
+                        <div class="col-6">
+                            <strong>更新时间：</strong>
+                            <p>${new Date(exam.updated_at).toLocaleString()}</p>
+                        </div>
+                    </div>
+                    <h6 class="border-bottom pb-2 mb-3">包含题目 (${questions.length})</h6>
+                    ${questions.map((q, i) => `
+                        <div class="border rounded p-2 mb-2">
+                            <div class="d-flex justify-content-between">
+                                <strong>题目 #${q.id}</strong>
+                                <small class="text-muted">#${i+1}</small>
+                            </div>
+                            <p class="mb-1 small">${q.content?.substring(0, 80) || '无内容'}${q.content?.length > 80 ? '...' : ''}</p>
+                            <small class="text-muted">类型ID: ${q.type_id || '未分类'}</small>
+                        </div>
+                    `).join('')}
+                `;
+                document.getElementById('detailModal').classList.add('active');
+            } catch (error) {
+                alert('加载失败: ' + error.message);
+            }
+        }
+
+        // 删除功能
+        async function deleteQuestion(id, event) {
+            event.stopPropagation();
+            if (confirm('确定要删除这个题目吗？')) {
+                try {
+                    await examDB.deleteQuestion(id);
+                    search();
+                } catch (error) {
+                    alert('删除失败: ' + error.message);
+                }
+            }
+        }
+
+        async function deleteExam(id, event) {
+            event.stopPropagation();
+            if (confirm('确定要删除这个试卷吗？将会同时删除该试卷下的所有题目！')) {
+                try {
+                    await examDB.deleteExam(id);
+                    search();
+                } catch (error) {
+                    alert('删除失败: ' + error.message);
+                }
+            }
+        }
+
+        async function deleteType(id, event) {
+            event.stopPropagation();
+            if (confirm('确定要删除这个题目类型吗？该类型下的题目将被取消分类！')) {
+                try {
+                    await examDB.deleteQuestionType(id);
+                    selectedTypeId = null;
+                    await loadData();
+                    search();
+                } catch (error) {
+                    alert('删除失败: ' + error.message);
+                }
+            }
+        }
+
+        async function deleteTag(id, event) {
+            event.stopPropagation();
+            if (confirm('确定要删除这个标签吗？')) {
+                try {
+                    await examDB.deleteQuestionTag(id);
+                    selectedTagIds.delete(id);
+                    await loadTagsByType(selectedTypeId);
+                    search();
+                } catch (error) {
+                    alert('删除失败: ' + error.message);
+                }
+            }
+        }
+
+        // 添加功能
+        function showAddTypeModal() {
+            document.getElementById('addTypeModal').classList.add('active');
+            document.getElementById('newTypeInput').focus();
+        }
+
+        function hideAddTypeModal() {
+            document.getElementById('addTypeModal').classList.remove('active');
+            document.getElementById('newTypeInput').value = '';
+        }
+
+        async function addNewType() {
+            const content = document.getElementById('newTypeInput').value.trim();
+            if (!content) return alert('请输入类型名称');
+            try {
+                await examDB.addQuestionType(content);
+                hideAddTypeModal();
+                await loadData();
+            } catch (error) {
+                alert('添加失败: ' + error.message);
+            }
+        }
+
+        function showAddTagModal() {
+            populateTypeSelect();
+            document.getElementById('addTagModal').classList.add('active');
+            document.getElementById('newTagInput').focus();
+        }
+
+        function hideAddTagModal() {
+            document.getElementById('addTagModal').classList.remove('active');
+            document.getElementById('newTagInput').value = '';
+        }
+
+        async function addNewTag() {
+            const content = document.getElementById('newTagInput').value.trim();
+            const typeId = document.getElementById('tagTypeSelect').value;
+            if (!content) return alert('请输入标签名称');
+            if (!typeId) return alert('请先选择一个题目类型');
+            try {
+                await examDB.addQuestionTag(content, parseInt(typeId));
+                hideAddTagModal();
+                await loadTagsByType(selectedTypeId);
+            } catch (error) {
+                alert('添加失败: ' + error.message);
+            }
+        }
+
+        async function populateTypeSelect() {
+            const select = document.getElementById('tagTypeSelect');
+            select.innerHTML = '<option value="">请选择类型</option>';
+            const types = await examDB.getAllQuestionTypes();
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type.id;
+                option.textContent = type.content;
+                select.appendChild(option);
+            });
+        }
+
+        function hideDetailModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        // 事件监听
+        document.getElementById('searchBtn').addEventListener('click', search);
+        document.getElementById('examSearch').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') search();
+        });
+
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.remove('active');
+            });
+        });
+
+        function showError(message) {
+            const container = document.getElementById('resultsGrid');
+            container.innerHTML = `
+                <div class="empty-state text-danger">
+                    <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
+                    <h4>搜索失败</h4>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+            // ==================== PWA 安装功能 ====================
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // 显示安装按钮
+        const installBtn = document.getElementById('installBtn');
+        if (installBtn) {
+            installBtn.style.display = 'block';
+        }
+    });
+
+    // 安装按钮点击事件
+    document.addEventListener('DOMContentLoaded', () => {
+        const installBtn = document.getElementById('installBtn');
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        console.log('用户已安装应用');
+                    }
+                    deferredPrompt = null;
+                    installBtn.style.display = 'none';
+                }
+            });
+        }
+    });
+
+    // 已安装时隐藏按钮
+    window.addEventListener('appinstalled', () => {
+        const installBtn = document.getElementById('installBtn');
+        if (installBtn) {
+            installBtn.style.display = 'none';
+        }
+    });
+        
+    </script>
+</body>
+</html>
